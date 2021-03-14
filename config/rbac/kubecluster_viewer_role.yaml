@@ -1,0 +1,20 @@
+# permissions for end users to view kubeclusters.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kubecluster-viewer-role
+rules:
+- apiGroups:
+  - networking.networking.aks.io
+  resources:
+  - kubeclusters
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.networking.aks.io
+  resources:
+  - kubeclusters/status
+  verbs:
+  - get

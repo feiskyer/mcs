@@ -1,0 +1,33 @@
+apiVersion: networking.networking.aks.io/v1alpha1
+kind: KubeCluster
+metadata:
+  name: aks-engine
+  namespace: default
+spec:
+  loadBalancerResourceGroup: <lb-resource-group>
+  kubeConfigSecret: aks-engine
+---
+apiVersion: networking.networking.aks.io/v1alpha1
+kind: KubeCluster
+metadata:
+  name: aks-cluster
+  namespace: default
+spec:
+  loadBalancerResourceGroup: <mc-resource-group>
+  kubeConfigSecret: aks-cluster
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aks-engine
+  namespace: default
+data:
+  kubeconfig: <KUBECONFIG-BASE64-ENCODED>
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aks-cluster
+  namespace: default
+data:
+  kubeconfig: <KUBECONFIG-BASE64-ENCODED>

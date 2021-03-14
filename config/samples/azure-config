@@ -1,0 +1,10 @@
+{
+  "cloud": "AzurePublicCloud",
+  "tenantId": "<tenantId>",
+  "subscriptionId": "<subscriptionId>",
+  "aadClientId": "<aadClientId>",
+  "aadClientSecret": "<aadClientSecret>",
+  "globalLoadBalancerName": "<glbName>",
+  "globalVIPLocation": "<region>",
+  "globalLoadBalancerResourceGroup": "<resourceGroup>"
+}

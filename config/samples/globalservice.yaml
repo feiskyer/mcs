@@ -1,0 +1,10 @@
+apiVersion: networking.networking.aks.io/v1alpha1
+kind: GlobalService
+metadata:
+  name: nginx
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP

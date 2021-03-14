@@ -1,0 +1,10 @@
+domain: networking.aks.io
+repo: github.com/feiskyer/mcs
+resources:
+- group: networking
+  kind: KubeCluster
+  version: v1alpha1
+- group: networking
+  kind: GlobalService
+  version: v1alpha1
+version: "2"

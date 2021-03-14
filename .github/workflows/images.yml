@@ -1,0 +1,29 @@
+on:
+  push:
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+  repository_dispatch:
+    types: github-actions
+  page_build:
+  release:
+    types:
+      - created
+
+name: Build and Push images
+
+jobs:
+  images:
+    name: Publish Images
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Docker Login
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build images
+      run: |
+        make docker-build
+    - name: Publish images
+      run: |
+        make docker-push
