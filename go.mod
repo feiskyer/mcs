@@ -1,6 +1,6 @@
 module github.com/feiskyer/mcs
 
-go 1.13
+go 1.16
 
 require (
 	github.com/Azure/azure-sdk-for-go v52.4.0+incompatible // indirect
