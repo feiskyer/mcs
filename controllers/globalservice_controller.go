@@ -80,7 +80,7 @@ func (r *GlobalServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 	if err := r.Get(ctx, req.NamespacedName, &globalService); err != nil {
 		if apierrors.IsNotFound(err) {
 			log.Info("GlobalService not found")
-			return ctrl.Result{}, nil
+			return ctrl.Result{}, r.reconcileGLB(&globalService, false)
 		}
 
 		log.Error(err, "unable to fetch GlobalService")
@@ -92,6 +92,8 @@ func (r *GlobalServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 		log.Info("Deleting global load balancer rule because the global service is under deleting")
 		return ctrl.Result{}, r.reconcileGLB(&globalService, false)
 	}
+
+	// TODO: query services in each cluster and then update globalService.status.Endpoints.
 
 	if len(globalService.Status.Endpoints) == 0 {
 		// Delete the global load balancer rule
