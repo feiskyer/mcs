@@ -42,6 +42,8 @@ make deploy
 
 Assume you have two Kubernetes clusters running on Azure, one is created via aks-engine and the other is created via AKS.
 
+Switch kubeconfig to MCS cluster, and then create the following two KubeCluster:
+
 ```sh
 # For cluster aks-engine
 kubectl create secret generic aks-engine --from-file=kubeconfig
@@ -70,25 +72,9 @@ spec:
 EOF
 ```
 
-### Deploy nginx service in both cluster
-
-MCS operator assumes the service names are same as globalservice in all clusters.
-
-```sh
-kubectx aks-engine
-kubectl create deployment nginx --image nginx --save-config
-kubectl expose deploy nginx --port=80 --type=LoadBalancer
-kubectl get service nginx
-
-kubectx aks-cluster
-kubectl create deployment nginx --image nginx --save-config
-kubectl expose deploy nginx --port=80 --type=LoadBalancer
-kubectl get service nginx
-```
-
 ### Create GlobalService
 
-Switch kubeconfig back to MCS cluster and then create global service:
+Switch kubeconfig to MCS cluster and then create global service:
 
 ```sh
 kubectx mcs-cluster
@@ -110,7 +96,25 @@ spec:
 EOF
 ```
 
-After a while, verify the VIP for the global service:
+### Deploy nginx service in both cluster
+
+MCS operator assumes the service names are same as globalservice in all clusters.
+
+```sh
+kubectx aks-engine
+kubectl create deployment nginx --image nginx --save-config
+kubectl expose deploy nginx --port=80 --type=LoadBalancer
+kubectl get service nginx
+
+kubectx aks-cluster
+kubectl create deployment nginx --image nginx --save-config
+kubectl expose deploy nginx --port=80 --type=LoadBalancer
+kubectl get service nginx
+```
+
+### Verify Global VIP
+
+Switch kubeconfig back to MCS cluster and then verify the VIP for the global service:
 
 ```sh
 $ kubectl get globalservice nginx -o yaml
