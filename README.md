@@ -100,6 +100,9 @@ metadata:
   name: nginx
   namespace: default
 spec:
+  clusterSet:
+  - aks-engine
+  - aks-cluster
   ports:
   - name: http
     port: 80

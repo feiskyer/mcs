@@ -18,9 +18,12 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
+	networkingv1alpha1 "github.com/feiskyer/mcs/api/v1alpha1"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -51,6 +54,30 @@ func (r *KubeServiceWatcher) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		// requeue (we'll need to wait for a new notification), and we can get them
 		// on deleted requests.
 		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	// Check global service existence and binding clusters.
+	var globalService networkingv1alpha1.GlobalService
+	if err := r.Get(ctx, req.NamespacedName, &globalService); err != nil {
+		if apierrors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+
+		log.Error(err, "unable to fetch GlobalService")
+		return ctrl.Result{}, err
+	}
+	if len(globalService.Spec.ClusterSet) > 0 {
+		clusterFound := false
+		for _, cluster := range globalService.Spec.ClusterSet {
+			clusterFullName := fmt.Sprintf("%s/%s", service.Namespace, cluster)
+			if clusterFullName == r.Name {
+				clusterFound = true
+				break
+			}
+		}
+		if !clusterFound {
+			return ctrl.Result{}, nil
+		}
 	}
 
 	if !service.ObjectMeta.DeletionTimestamp.IsZero() {
