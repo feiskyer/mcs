@@ -114,7 +114,6 @@ func (r *KubeClusterReconciler) newKubeClusterManager(cluster networkingv1alpha1
 
 	scheme := runtime.NewScheme()
 	_ = clientgoscheme.AddToScheme(scheme)
-	_ = networkingv1alpha1.AddToScheme(scheme)
 	clusterManager, err := ctrl.NewManager(config, ctrl.Options{
 		Scheme:             scheme,
 		LeaderElection:     false,

@@ -28,11 +28,20 @@ import (
 	"github.com/go-logr/logr"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+type ServiceEndpoint struct {
+	Cluster        string
+	Namespace      string
+	Service        types.NamespacedName
+	ResourceGroup  string
+	LoadBalancerIP string
+}
 
 // GlobalServiceReconciler reconciles a GlobalService object
 type GlobalServiceReconciler struct {
@@ -183,6 +192,22 @@ func (r *GlobalServiceReconciler) reconcileEndpoints(req ServiceEndpoint) (ctrl.
 		return ctrl.Result{}, err
 	}
 
+	// Filter cluster set from global service spec.
+	if len(globalService.Spec.ClusterSet) > 0 {
+		clusterFound := false
+		for _, cluster := range globalService.Spec.ClusterSet {
+			clusterFullName := fmt.Sprintf("%s/%s", req.Namespace, cluster)
+			if clusterFullName == req.Cluster {
+				clusterFound = true
+				break
+			}
+		}
+		if !clusterFound {
+			return ctrl.Result{}, nil
+		}
+	}
+
+	// Endpoints don't need any further actions when deleting global service.
 	if !globalService.ObjectMeta.DeletionTimestamp.IsZero() {
 		return ctrl.Result{}, nil
 	}

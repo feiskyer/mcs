@@ -27,7 +27,6 @@ import (
 	"github.com/Azure/go-autorest/autorest/to"
 	networkingv1alpha1 "github.com/feiskyer/mcs/api/v1alpha1"
 	"github.com/feiskyer/mcs/azureclients"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 const (
@@ -38,13 +37,6 @@ const (
 	// LoadBalancerProbeIDTemplate is the template of the load balancer probe
 	LoadBalancerProbeIDTemplate = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/loadBalancers/%s/probes/%s"
 )
-
-type ServiceEndpoint struct {
-	Cluster        string
-	Service        types.NamespacedName
-	ResourceGroup  string
-	LoadBalancerIP string
-}
 
 type RegionalIPConfig struct {
 	IP       string
