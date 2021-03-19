@@ -26,6 +26,7 @@ import (
 	"github.com/feiskyer/mcs/azureclients/loadbalancerclient"
 	"github.com/feiskyer/mcs/azureclients/publicipclient"
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -47,12 +48,13 @@ type ServiceEndpoint struct {
 type GlobalServiceReconciler struct {
 	client.Client
 	azureclients.AzureConfig
-	Log                  logr.Logger
-	Scheme               *runtime.Scheme
-	LoadBalancerClient   loadbalancerclient.Interface
-	PublicIPClient       publicipclient.Interface
-	AzureConfigSecret    string
-	AzureConfigNamespace string
+	Log                   logr.Logger
+	Scheme                *runtime.Scheme
+	LoadBalancerClient    loadbalancerclient.Interface
+	PublicIPClient        publicipclient.Interface
+	KubeClusterReconciler *KubeClusterReconciler
+	AzureConfigSecret     string
+	AzureConfigNamespace  string
 
 	JitterPeriod time.Duration
 	WorkQueue    workqueue.RateLimitingInterface
@@ -93,7 +95,9 @@ func (r *GlobalServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 		return ctrl.Result{}, r.reconcileGLB(&globalService, false)
 	}
 
-	// TODO: query services in each cluster and then update globalService.status.Endpoints.
+	if ret, err := r.reconcileServiceEndpoints(&globalService); err != nil {
+		return ret, err
+	}
 
 	if len(globalService.Status.Endpoints) == 0 {
 		// Delete the global load balancer rule
@@ -104,6 +108,60 @@ func (r *GlobalServiceReconciler) Reconcile(req ctrl.Request) (ctrl.Result, erro
 	if err := r.reconcileGLB(&globalService, true); err != nil {
 		log.Error(err, "unable to reconcile global load balancer")
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+func (r *GlobalServiceReconciler) reconcileServiceEndpoints(globalService *networkingv1alpha1.GlobalService) (ctrl.Result, error) {
+	ctx := context.Background()
+	log := r.Log.WithValues("globalservice", globalService.Name)
+	namespacedName := types.NamespacedName{Namespace: globalService.Namespace, Name: globalService.Name}
+	if len(globalService.Spec.ClusterSet) == 0 {
+		return ctrl.Result{}, nil
+	}
+
+	r.KubeClusterReconciler.Lock.Lock()
+	defer r.KubeClusterReconciler.Lock.Unlock()
+
+	for _, clusterName := range globalService.Spec.ClusterSet {
+		clusterNamespacedName := types.NamespacedName{Namespace: globalService.Namespace, Name: clusterName}
+		if clusterManager, ok := r.KubeClusterReconciler.KubeClusterManagers[clusterNamespacedName.String()]; ok {
+			client := clusterManager.GetClient()
+
+			var cluster networkingv1alpha1.KubeCluster
+			if err := r.Get(ctx, clusterNamespacedName, &cluster); err != nil {
+				log.WithValues("cluster", clusterNamespacedName).Error(err, "unable to fetch KubeCluster")
+				continue
+			}
+
+			var service corev1.Service
+			if err := client.Get(ctx, namespacedName, &service); err != nil {
+				if apierrors.IsNotFound(err) {
+					log.WithValues("cluster", clusterNamespacedName).Info("service not found")
+					continue
+				}
+
+				// We continue to fetch next clusters if there're something wrong on one of them.
+				log.WithValues("cluster", namespacedName).Error(err, "unable to fetch Service")
+				continue
+			}
+
+			loadBalancerIP := ""
+			if len(service.Status.LoadBalancer.Ingress) > 0 && service.ObjectMeta.DeletionTimestamp.IsZero() {
+				loadBalancerIP = service.Status.LoadBalancer.Ingress[0].IP
+			}
+			ret, err := r.reconcileEndpoints(ServiceEndpoint{
+				Cluster:        clusterNamespacedName.String(),
+				Namespace:      globalService.Namespace,
+				Service:        namespacedName,
+				ResourceGroup:  cluster.Spec.LoadBalancerResourceGroup,
+				LoadBalancerIP: loadBalancerIP,
+			})
+			if err != nil {
+				return ret, err
+			}
+		}
 	}
 
 	return ctrl.Result{}, nil

@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	networkingv1alpha1 "github.com/feiskyer/mcs/api/v1alpha1"
 	"github.com/go-logr/logr"
@@ -28,6 +29,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -50,8 +52,9 @@ type KubeClusterReconciler struct {
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 
-	GlobalServiceReconciler *GlobalServiceReconciler
-	KubeClusterManagers     map[string]*KubeClusterManager
+	WorkQueue           workqueue.RateLimitingInterface
+	Lock                sync.Mutex
+	KubeClusterManagers map[string]*KubeClusterManager
 }
 
 // +kubebuilder:rbac:groups=networking.networking.aks.io,resources=kubeclusters,verbs=get;list;watch;create;update;patch;delete
@@ -70,13 +73,18 @@ func (r *KubeClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	r.Lock.Lock()
+	defer r.Lock.Unlock()
+
 	// Stop KubeClusterManager on cluster deletion.
 	clusterName := req.NamespacedName.String()
 	if !cluster.ObjectMeta.DeletionTimestamp.IsZero() {
+
 		if mgr, ok := r.KubeClusterManagers[clusterName]; ok {
 			close(mgr.StopChan)
 			delete(r.KubeClusterManagers, clusterName)
 		}
+
 		return ctrl.Result{}, nil
 	}
 
@@ -125,12 +133,12 @@ func (r *KubeClusterReconciler) newKubeClusterManager(cluster networkingv1alpha1
 
 	namespacedName := types.NamespacedName{Namespace: cluster.Namespace, Name: cluster.Name}
 	if err = (&KubeServiceWatcher{
-		Name:                    namespacedName.String(),
-		Client:                  clusterManager.GetClient(),
-		GlobalServiceReconciler: r.GlobalServiceReconciler,
-		Log:                     ctrl.Log.WithName(namespacedName.String()),
-		Scheme:                  clusterManager.GetScheme(),
-		ResourceGroup:           cluster.Spec.LoadBalancerResourceGroup,
+		Name:          namespacedName.String(),
+		Client:        clusterManager.GetClient(),
+		WorkQueue:     r.WorkQueue,
+		Log:           ctrl.Log.WithName(namespacedName.String()),
+		Scheme:        clusterManager.GetScheme(),
+		ResourceGroup: cluster.Spec.LoadBalancerResourceGroup,
 	}).SetupWithManager(clusterManager); err != nil {
 		return nil, err
 	}

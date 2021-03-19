@@ -71,27 +71,30 @@ func main() {
 		os.Exit(1)
 	}
 
+	rateLimitingWorkQueue := workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "GlobalServiceReconciler")
+	kubeClusterReconciler := &controllers.KubeClusterReconciler{
+		Client:              mgr.GetClient(),
+		WorkQueue:           rateLimitingWorkQueue,
+		KubeClusterManagers: make(map[string]*controllers.KubeClusterManager),
+		Log:                 ctrl.Log.WithName("controllers").WithName("KubeCluster"),
+		Scheme:              mgr.GetScheme(),
+	}
+	if err = kubeClusterReconciler.SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "KubeCluster")
+		os.Exit(1)
+	}
 	globalServiceReconciler := &controllers.GlobalServiceReconciler{
-		Client:               mgr.GetClient(),
-		Log:                  ctrl.Log.WithName("controllers").WithName("GlobalService"),
-		Scheme:               mgr.GetScheme(),
-		JitterPeriod:         time.Second,
-		AzureConfigSecret:    azureConfigSecret,
-		AzureConfigNamespace: azureConfigNamespace,
-		WorkQueue:            workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "GlobalServiceReconciler"),
+		Client:                mgr.GetClient(),
+		Log:                   ctrl.Log.WithName("controllers").WithName("GlobalService"),
+		Scheme:                mgr.GetScheme(),
+		JitterPeriod:          time.Second,
+		AzureConfigSecret:     azureConfigSecret,
+		AzureConfigNamespace:  azureConfigNamespace,
+		WorkQueue:             rateLimitingWorkQueue,
+		KubeClusterReconciler: kubeClusterReconciler,
 	}
 	if err = globalServiceReconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GlobalService")
-		os.Exit(1)
-	}
-	if err = (&controllers.KubeClusterReconciler{
-		Client:                  mgr.GetClient(),
-		GlobalServiceReconciler: globalServiceReconciler,
-		KubeClusterManagers:     make(map[string]*controllers.KubeClusterManager),
-		Log:                     ctrl.Log.WithName("controllers").WithName("KubeCluster"),
-		Scheme:                  mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "KubeCluster")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

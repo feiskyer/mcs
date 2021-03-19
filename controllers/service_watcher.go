@@ -22,6 +22,7 @@ import (
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -34,7 +35,7 @@ type KubeServiceWatcher struct {
 	Scheme        *runtime.Scheme
 	ResourceGroup string
 
-	GlobalServiceReconciler *GlobalServiceReconciler
+	WorkQueue workqueue.RateLimitingInterface
 }
 
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch
@@ -61,7 +62,7 @@ func (r *KubeServiceWatcher) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			ResourceGroup:  r.ResourceGroup,
 			LoadBalancerIP: "",
 		}
-		r.GlobalServiceReconciler.WorkQueue.Add(serviceEndpoint)
+		r.WorkQueue.Add(serviceEndpoint)
 		return ctrl.Result{}, nil
 	}
 
@@ -74,7 +75,7 @@ func (r *KubeServiceWatcher) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Service:        req.NamespacedName,
 			LoadBalancerIP: loadBalancerIP,
 		}
-		r.GlobalServiceReconciler.WorkQueue.Add(serviceEndpoint)
+		r.WorkQueue.Add(serviceEndpoint)
 		return ctrl.Result{}, nil
 	}
 
