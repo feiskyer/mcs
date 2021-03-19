@@ -16,7 +16,17 @@ spec:
     singular: globalservice
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.ports[*].port
+      name: Ports
+      type: string
+    - jsonPath: .status.vip
+      name: VIP
+      type: string
+    - jsonPath: .status.state
+      name: State
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: GlobalService is the Schema for the globalservices API

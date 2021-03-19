@@ -57,6 +57,9 @@ type GlobalEndpoint struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Ports",type=string,JSONPath=`.spec.ports[*].port`
+// +kubebuilder:printcolumn:name="VIP",type=string,JSONPath=`.status.vip`
+// +kubebuilder:printcolumn:name="State",type=string,JSONPath=`.status.state`
 
 // GlobalService is the Schema for the globalservices API
 type GlobalService struct {
