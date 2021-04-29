@@ -38,8 +38,6 @@ spec:
           properties:
             kubeConfigSecret:
               type: string
-            loadBalancerResourceGroup:
-              type: string
           type: object
         status:
           description: KubeClusterStatus defines the observed state of KubeCluster

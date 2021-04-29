@@ -40,7 +40,6 @@ type ServiceEndpoint struct {
 	Cluster        string
 	Namespace      string
 	Service        types.NamespacedName
-	ResourceGroup  string
 	LoadBalancerIP string
 }
 
@@ -155,7 +154,6 @@ func (r *GlobalServiceReconciler) reconcileServiceEndpoints(globalService *netwo
 				Cluster:        clusterNamespacedName.String(),
 				Namespace:      globalService.Namespace,
 				Service:        namespacedName,
-				ResourceGroup:  cluster.Spec.LoadBalancerResourceGroup,
 				LoadBalancerIP: loadBalancerIP,
 			})
 			if err != nil {
@@ -289,9 +287,8 @@ func (r *GlobalServiceReconciler) reconcileEndpoints(req ServiceEndpoint) (ctrl.
 		}
 		if !serviceFound {
 			endpoints = append(endpoints, networkingv1alpha1.GlobalEndpoint{
-				Cluster:       req.Cluster,
-				ResourceGroup: req.ResourceGroup,
-				IP:            req.LoadBalancerIP,
+				Cluster: req.Cluster,
+				IP:      req.LoadBalancerIP,
 			})
 			needUpdateEndpoints = true
 		}

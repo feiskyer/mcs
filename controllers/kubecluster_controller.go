@@ -133,12 +133,11 @@ func (r *KubeClusterReconciler) newKubeClusterManager(cluster networkingv1alpha1
 
 	namespacedName := types.NamespacedName{Namespace: cluster.Namespace, Name: cluster.Name}
 	if err = (&KubeServiceWatcher{
-		Name:          namespacedName.String(),
-		Client:        clusterManager.GetClient(),
-		WorkQueue:     r.WorkQueue,
-		Log:           ctrl.Log.WithName(namespacedName.String()),
-		Scheme:        clusterManager.GetScheme(),
-		ResourceGroup: cluster.Spec.LoadBalancerResourceGroup,
+		Name:      namespacedName.String(),
+		Client:    clusterManager.GetClient(),
+		WorkQueue: r.WorkQueue,
+		Log:       ctrl.Log.WithName(namespacedName.String()),
+		Scheme:    clusterManager.GetScheme(),
 	}).SetupWithManager(clusterManager); err != nil {
 		return nil, err
 	}

@@ -4,7 +4,6 @@ metadata:
   name: aks-engine
   namespace: default
 spec:
-  loadBalancerResourceGroup: <lb-resource-group>
   kubeConfigSecret: aks-engine
 ---
 apiVersion: networking.aks.io/v1alpha1
@@ -13,7 +12,6 @@ metadata:
   name: aks-cluster
   namespace: default
 spec:
-  loadBalancerResourceGroup: <mc-resource-group>
   kubeConfigSecret: aks-cluster
 ---
 apiVersion: v1

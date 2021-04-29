@@ -54,7 +54,6 @@ metadata:
   name: aks-engine
   namespace: default
 spec:
-  loadBalancerResourceGroup: <lb-resource-group>
   kubeConfigSecret: aks-engine
 EOF
 
@@ -67,7 +66,6 @@ metadata:
   name: aks-cluster
   namespace: default
 spec:
-  loadBalancerResourceGroup: <mc-resource-group>
   kubeConfigSecret: aks-cluster
 EOF
 ```

@@ -28,8 +28,7 @@ type KubeClusterSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	KubeConfigSecret          string `json:"kubeConfigSecret,omitempty"`
-	LoadBalancerResourceGroup string `json:"loadBalancerResourceGroup,omitempty"`
+	KubeConfigSecret string `json:"kubeConfigSecret,omitempty"`
 }
 
 // KubeClusterStatus defines the observed state of KubeCluster

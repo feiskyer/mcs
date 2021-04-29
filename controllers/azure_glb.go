@@ -554,7 +554,8 @@ func (r *GlobalServiceReconciler) getRegionalSLBConfigurations(globalService *ne
 
 	regionalSLBConfigurations := make([]RegionalIPConfig, len(globalService.Status.Endpoints))
 	for i, ep := range globalService.Status.Endpoints {
-		pipList, rerr := r.PublicIPClient.List(context.Background(), ep.ResourceGroup)
+		// pipList, rerr := r.PublicIPClient.List(context.Background(), ep.ResourceGroup)
+		pipList, rerr := r.PublicIPClient.ListAll(context.Background())
 		if rerr != nil {
 			return nil, rerr.Error()
 		}
@@ -571,7 +572,7 @@ func (r *GlobalServiceReconciler) getRegionalSLBConfigurations(globalService *ne
 			}
 		}
 		if !found {
-			return nil, fmt.Errorf("unable to found public IP %s in resource group %s", ep.IP, ep.ResourceGroup)
+			return nil, fmt.Errorf("unable to found public IP %s in subscription %s", ep.IP, r.AzureConfig.SubscriptionID)
 		}
 	}
 

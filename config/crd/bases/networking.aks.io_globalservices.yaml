@@ -74,8 +74,6 @@ spec:
                     type: string
                   ip:
                     type: string
-                  resourceGroup:
-                    type: string
                 type: object
               type: array
             state:

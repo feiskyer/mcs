@@ -50,9 +50,8 @@ type GlobalServiceStatus struct {
 }
 
 type GlobalEndpoint struct {
-	Cluster       string `json:"cluster,omitempty"`
-	ResourceGroup string `json:"resourceGroup,omitempty"`
-	IP            string `json:"ip,omitempty"`
+	Cluster string `json:"cluster,omitempty"`
+	IP      string `json:"ip,omitempty"`
 }
 
 // +kubebuilder:object:root=true

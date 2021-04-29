@@ -30,10 +30,9 @@ import (
 // KubeServiceWatcher reconciles a KubeServiceWatcher object
 type KubeServiceWatcher struct {
 	client.Client
-	Name          string
-	Log           logr.Logger
-	Scheme        *runtime.Scheme
-	ResourceGroup string
+	Name   string
+	Log    logr.Logger
+	Scheme *runtime.Scheme
 
 	WorkQueue workqueue.RateLimitingInterface
 }
@@ -59,7 +58,6 @@ func (r *KubeServiceWatcher) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 			Cluster:        r.Name,
 			Namespace:      req.Namespace,
 			Service:        req.NamespacedName,
-			ResourceGroup:  r.ResourceGroup,
 			LoadBalancerIP: "",
 		}
 		r.WorkQueue.Add(serviceEndpoint)
@@ -71,7 +69,6 @@ func (r *KubeServiceWatcher) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 		serviceEndpoint := ServiceEndpoint{
 			Cluster:        r.Name,
 			Namespace:      req.Namespace,
-			ResourceGroup:  r.ResourceGroup,
 			Service:        req.NamespacedName,
 			LoadBalancerIP: loadBalancerIP,
 		}
