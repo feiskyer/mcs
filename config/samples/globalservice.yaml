@@ -1,4 +1,4 @@
-apiVersion: networking.networking.aks.io/v1alpha1
+apiVersion: networking.aks.io/v1alpha1
 kind: GlobalService
 metadata:
   name: nginx

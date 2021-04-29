@@ -57,8 +57,8 @@ type KubeClusterReconciler struct {
 	KubeClusterManagers map[string]*KubeClusterManager
 }
 
-// +kubebuilder:rbac:groups=networking.networking.aks.io,resources=kubeclusters,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=networking.networking.aks.io,resources=kubeclusters/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=networking.aks.io,resources=kubeclusters,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=networking.aks.io,resources=kubeclusters/status,verbs=get;update;patch
 
 func (r *KubeClusterReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()

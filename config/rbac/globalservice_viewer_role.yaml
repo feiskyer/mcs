@@ -5,7 +5,7 @@ metadata:
   name: globalservice-viewer-role
 rules:
 - apiGroups:
-  - networking.networking.aks.io
+  - networking.aks.io
   resources:
   - globalservices
   verbs:
@@ -13,7 +13,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - networking.networking.aks.io
+  - networking.aks.io
   resources:
   - globalservices/status
   verbs:

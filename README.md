@@ -48,7 +48,7 @@ Switch kubeconfig to MCS cluster, and then create the following two KubeCluster:
 # For cluster aks-engine
 kubectl create secret generic aks-engine --from-file=kubeconfig
 cat <<EOF | kubectl apply -f -
-apiVersion: networking.networking.aks.io/v1alpha1
+apiVersion: networking.aks.io/v1alpha1
 kind: KubeCluster
 metadata:
   name: aks-engine
@@ -61,7 +61,7 @@ EOF
 # For cluster aks-cluster
 kubectl create secret generic aks-cluster --from-file=kubeconfig
 cat <<EOF | kubectl apply -f -
-apiVersion: networking.networking.aks.io/v1alpha1
+apiVersion: networking.aks.io/v1alpha1
 kind: KubeCluster
 metadata:
   name: aks-cluster
@@ -80,7 +80,7 @@ Switch kubeconfig to MCS cluster and then create global service:
 kubectx mcs-cluster
 
 cat <<EOF | kubectl apply -f -
-apiVersion: networking.networking.aks.io/v1alpha1
+apiVersion: networking.aks.io/v1alpha1
 kind: GlobalService
 metadata:
   name: nginx
@@ -118,13 +118,13 @@ Switch kubeconfig back to MCS cluster and then verify the VIP for the global ser
 
 ```sh
 $ kubectl get globalservice nginx -o yaml
-apiVersion: networking.networking.aks.io/v1alpha1
+apiVersion: networking.aks.io/v1alpha1
 kind: GlobalService
 metadata:
   name: nginx
   namespace: default
   resourceVersion: "279410693"
-  selfLink: /apis/networking.networking.aks.io/v1alpha1/namespaces/default/globalservices/nginx
+  selfLink: /apis/networking.aks.io/v1alpha1/namespaces/default/globalservices/nginx
   uid: edb771f9-328e-4785-b94d-b70e13b10ffe
 spec:
   ports:

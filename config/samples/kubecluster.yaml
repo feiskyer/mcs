@@ -1,4 +1,4 @@
-apiVersion: networking.networking.aks.io/v1alpha1
+apiVersion: networking.aks.io/v1alpha1
 kind: KubeCluster
 metadata:
   name: aks-engine
@@ -7,7 +7,7 @@ spec:
   loadBalancerResourceGroup: <lb-resource-group>
   kubeConfigSecret: aks-engine
 ---
-apiVersion: networking.networking.aks.io/v1alpha1
+apiVersion: networking.aks.io/v1alpha1
 kind: KubeCluster
 metadata:
   name: aks-cluster

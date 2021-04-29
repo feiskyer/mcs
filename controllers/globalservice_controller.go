@@ -60,8 +60,8 @@ type GlobalServiceReconciler struct {
 	WorkQueue    workqueue.RateLimitingInterface
 }
 
-// +kubebuilder:rbac:groups=networking.networking.aks.io,resources=globalservices,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=networking.networking.aks.io,resources=globalservices/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=networking.aks.io,resources=globalservices,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=networking.aks.io,resources=globalservices/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch
 // +kubebuilder:rbac:groups=core,resources=services/status,verbs=get
