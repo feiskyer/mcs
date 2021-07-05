@@ -380,7 +380,7 @@ func (r *GlobalServiceReconciler) getExpectedGLBRulesProbes(glb *network.LoadBal
 				BackendPort:         to.Int32Ptr(int32(port.Port)),
 				EnableTCPReset:      to.BoolPtr(true),
 				DisableOutboundSnat: to.BoolPtr(false),
-				EnableFloatingIP:    to.BoolPtr(false),
+				EnableFloatingIP:    to.BoolPtr(true),
 				Probe: &network.SubResource{
 					ID: to.StringPtr(fmt.Sprintf(LoadBalancerProbeIDTemplate, r.SubscriptionID,
 						r.GlobalLoadBalancerResourceGroup,
