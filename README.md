@@ -4,8 +4,8 @@ An operator for exposing services from multiple Kubernetes clusters by leveragin
 
 ![](https://docs.microsoft.com/en-us/azure/load-balancer/media/cross-region-overview/cross-region-load-balancer.png)
 
-**Status:** DRAFT
-**Issues:** due to limitations of Global LoadBalancer, FloatingIP needs to be enabled on both Global LoadBalancer and regional LoadBalancer. And the the global VIP needs to be configured on each nodes to make FloatingIP work (this could be done by adding global VIP to each cluster's `service.status.loadBalancer.ingress[]`.
+- **Status:** DRAFT
+- **Issues:** due to limitations of Global LoadBalancer, FloatingIP needs to be enabled on both Global LoadBalancer and regional LoadBalancer. And the the global VIP needs to be configured on each nodes to make FloatingIP work (this could be done by adding global VIP to each cluster's `service.status.loadBalancer.ingress[]`.
 
 ## How to deploy MCS operator
 
